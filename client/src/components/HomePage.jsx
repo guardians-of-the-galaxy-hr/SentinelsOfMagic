@@ -34,7 +34,7 @@ class HomePage extends React.Component {
     } else {
       return (
         <Card className="container">
-          <CardTitle title="Welcome to Fridgr" subtitle="Tracking groceries got you stressed? Chill." />
+          <CardTitle title="Welcome to Divy" subtitle="Tracking groceries got you stressed? Chill." />
         </Card>
       );
     }

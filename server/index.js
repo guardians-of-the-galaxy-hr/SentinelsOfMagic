@@ -131,11 +131,11 @@ app.post('/checkUsers', function(req, res) {
 });
 
 app.post('/createUser', function(req, res) {
-  db.query('SELECT * FROM users WHERE username=${userName} and house_id=${houseId#}', { userName: req.body.userName, houseId: req.body.houseId })
+  db.query('SELECT * FROM users WHERE username=${userName} and house_id=${houseId#}', { userName: req.body.username, houseId: req.body.houseId })
     .then((data)=>{
       if (data.length === 0) {
         console.log('shouldnt show up if array has stuff');
-        db.query('INSERT INTO users (username, house_id) VALUES (${userName}, ${houseId#})', { userName: req.body.userName, houseId: req.body.houseId } )
+        db.query('INSERT INTO users (username, email, house_id) VALUES (${userName}, ${email} ${houseId#})', { userName: req.body.username, email: req.body.email, houseId: req.body.houseId } )
           .then(() => {
             res.send('Successfully created user');
           })
@@ -177,7 +177,7 @@ app.post('/settingCooks', function(req, res) {
 });
 
 app.post('/cookUser', function(req, res) {
-  db.query('SELECT * FROM users WHERE username=${userName} AND house_id=${houseId#}', { userName: req.body.userName, houseId: req.body.houseId })
+  db.query('SELECT * FROM users WHERE username=${userName} AND house_id=${houseId#}', { userName: req.body.username, houseId: req.body.houseId })
   .then( (data)=> {
     // res.clearCookie('userId');
     // res.cookie('userId', data[0].id);
