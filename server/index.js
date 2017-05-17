@@ -7,7 +7,10 @@ let path = require('path');
 var cookieParser = require('cookie-parser');
 var utils = require('./lib/inventoryUtils.js');
 var assignCookie = require('./middleware/assignCookie');
+var ItemSearchHelper = require('./lib/ItemSearchHelper');
+var Promise = require('bluebird');
 
+Promise.promisifyAll(ItemSearchHelper);
 let checkAuth = require('./middleware/authorizedRequest.js');
 
 let app = express();
@@ -213,48 +216,69 @@ app.post('/users', function(req, res) {
 
 app.post('/add', (req, res) => {
 
-  console.log('Adding item to inventory... ');
+  console.log('Adding item to inventory... ', req.body);
 
-  var validate = utils.validateAddItemForm(req.body);
+  // var validate = utils.validateAddItemForm(req.body);
 
-  if (!validate.success) {
-    console.log('validate: ', validate.errors);
-    return res.status(400).json(validate.errors);
-  }
+  // if (!validate.success) {
+  //   console.log('validate: ', validate.errors);
+  //   return res.status(400).json(validate.errors);
+  // }
 
-  db.query('SELECT id FROM items WHERE itemname = ${name}', { name: req.body.name })
-    .then(body => {
-      console.log(`Successful query of ITEMS table for ${req.body.name}`);
-      if (body.length > 0) {
-        db.query('INSERT INTO houses_items (house_id, item_id, need_to_restock, notes) VALUES (${houseId#}, ${itemId#}, ${needToRestock^}, ${notes})',
-          { houseId: req.body.houseId, itemId: body[0].id, needToRestock: false, notes: req.body.notes })
-          .then(() => {
-            console.log(`Successful insert into HOUSES_ITEMS table: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}}`);
-            res.sendStatus(201);
-          })
-          .catch(err => console.log(`Unable to add item to HOUSES_ITEMS table: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}} `, err));
-        return;
-      }
-      db.query('INSERT INTO items (itemname) VALUES (${name})', { name: req.body.name })
-        .then(() => {
-          console.log(`Successfully inserted ${req.body.name} into ITEMS table`);
-          db.query('SELECT id FROM items WHERE itemname = ${name}', { name: req.body.name })
-          .then(body => {
-            console.log(`Successful retrieve of item id = ${body[0].id} for itemname = ${req.body.name} from ITEMS`);
-            db.query('INSERT INTO houses_items (house_id, item_id, need_to_restock, notes) VALUES (${houseId#}, ${itemId#}, ${needToRestock^}, ${notes})',
-              { houseId: req.body.houseId, itemId: body[0].id, needToRestock: false, notes: req.body.notes })
-              .then(() => {
-                console.log(`Successful insert into HOUSES_ITEMS: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}}`);
-                res.sendStatus(201);
-              })
-              .catch(err => console.log(`Unable to add to HOUSES_ITEMS table: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}} `, err));
-          })
-          .catch(err => console.log(`Error retrieving the item id = ${body[0].id} for itemname = ${req.body.name} from ITEMS: `, err));
-        })
-        .catch(err => console.log(`Error inserting ${req.body.name} into ITEMS: `, err));
-      return;
-    })
-    .catch(err => console.log(`Error querying ITEMS table for ${req.body.name}: `, err));
+  // db.query('SELECT id FROM items WHERE itemname = ${name}', { name: req.body.name })
+  //   .then(body => {
+  //     console.log(`Successful query of ITEMS table for ${req.body.name}`);
+  //     if (body.length > 0) {
+  //       db.query('INSERT INTO houses_items (house_id, item_id, need_to_restock, notes) VALUES (${houseId#}, ${itemId#}, ${needToRestock^}, ${notes})',
+  //         { houseId: req.body.houseId, itemId: body[0].id, needToRestock: false, notes: req.body.notes })
+  //         .then(() => {
+  //           console.log(`Successful insert into HOUSES_ITEMS table: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}}`);
+  //           res.sendStatus(201);
+  //         })
+  //         .catch(err => console.log(`Unable to add item to HOUSES_ITEMS table: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}} `, err));
+  //       return;
+  //     }
+  //     db.query('INSERT INTO items (itemname) VALUES (${name})', { name: req.body.name })
+  //       .then(() => {
+  //         console.log(`Successfully inserted ${req.body.name} into ITEMS table`);
+  //         db.query('SELECT id FROM items WHERE itemname = ${name}', { name: req.body.name })
+  //         .then(body => {
+  //           console.log(`Successful retrieve of item id = ${body[0].id} for itemname = ${req.body.name} from ITEMS`);
+  //           db.query('INSERT INTO houses_items (house_id, item_id, need_to_restock, notes) VALUES (${houseId#}, ${itemId#}, ${needToRestock^}, ${notes})',
+  //             { houseId: req.body.houseId, itemId: body[0].id, needToRestock: false, notes: req.body.notes })
+  //             .then(() => {
+  //               console.log(`Successful insert into HOUSES_ITEMS: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}}`);
+  //               res.sendStatus(201);
+  //             })
+  //             .catch(err => console.log(`Unable to add to HOUSES_ITEMS table: {houseId: ${req.body.houseId}, itemId: ${body[0].id}, needToRestock: false, notes: ${req.body.notes}} `, err));
+  //         })
+  //         .catch(err => console.log(`Error retrieving the item id = ${body[0].id} for itemname = ${req.body.name} from ITEMS: `, err));
+  //       })
+  //       .catch(err => console.log(`Error inserting ${req.body.name} into ITEMS: `, err));
+  //     return;
+  //   })
+  //   .catch(err => console.log(`Error querying ITEMS table for ${req.body.name}: `, err));
+  // request({
+  //   method: 'GET',
+  //   url: 'http://api.walmartlabs.com/v1/search?query=milk&format=json&apiKey=katt3r4gj4kgjc2zvfy2kr2a',
+  // }, (err, res, body) => {
+  //   if (err) {
+  //     callback(err);
+  //   } else {
+  //     callback(err, body);
+  //   }
+  // });
+  //ItemSearchHelper.searchWalmartProducts();
+  ItemSearchHelper.searchWalmartAsync(req.body.name)
+  .then((result) => {
+    console.log(JSON.parse(result));
+    res.send(JSON.parse(result).items);
+  })
+  .catch ((error) =>{
+    console.log(error);
+    res.send(error);
+  });
+  
 });
 
 app.get('/api/shop', checkAuth.APICall, routeHandlers.getShoppingList);
