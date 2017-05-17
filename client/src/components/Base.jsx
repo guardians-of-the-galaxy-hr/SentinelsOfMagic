@@ -22,7 +22,7 @@ class Base extends React.Component {
   }
 
   render() {
-    if (localStorage.getItem('loggedIn') !== null) {
+    if (localStorage.getItem('loggedIn') !== null) {  //user lgged in or not, check LoginPage.jsx
       return (
         <div>
           <AppBar

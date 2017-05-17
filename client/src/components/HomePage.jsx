@@ -14,6 +14,7 @@ class HomePage extends React.Component {
 
   componentWillMount() {
     let cookies = parse(document.cookie);
+    console.log(cookies);
     let fridgrSesh = JSON.parse(cookies.fridgrSesh.slice(2));
 
     if (cookies && fridgrSesh.houseId && !fridgrSesh.userId) {

@@ -4,6 +4,11 @@ import { NavLink, Link } from 'react-router-dom';
 import { Card, CardText } from 'material-ui/Card';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
+import SelectField from 'material-ui/SelectField';
+import MenuItem from 'material-ui/MenuItem';
+import ApiSearchResults from './ApiSearchResults.jsx';
+
+
 
 class AddItemForm extends React.Component {
   constructor(props) {
@@ -14,16 +19,20 @@ class AddItemForm extends React.Component {
       notes: '',
       houseId: this.props.houseId,
       errorName: '',
-      errorText: ''
+      errorText: '',
+      ItemName: '',
+      selectedValue: '',
+      dataSource: [],
     };
   }
 
   postItem(obj) {
     axios.post('/add', obj)
       .then(res => {
-        console.log('Successful POST request to /add');
-        this.props.submitItem();
-        this.props.toggleForm(false);
+        console.log( res);
+        //this.props.submitItem();
+        //this.props.toggleForm(false);
+        this.setState.dataSource = res; 
       })
       .catch(err => {
         console.log('Bad POST request to /add: ', err.response.data);
@@ -54,6 +63,17 @@ class AddItemForm extends React.Component {
     });
   }
 
+  handleSelected(event, index, value) {
+    this.setState({     
+      selectedValue: value,
+      ItemName: value
+    });
+  }
+
+
+  
+  //handleChange = (event, index, value) => this.setState({value});
+
   render() {
     return (
       <Card className="container">
@@ -68,6 +88,14 @@ class AddItemForm extends React.Component {
               errorText={this.state.errorName}>
             </TextField>
           </div>
+          <SelectField
+            floatingLabelText="Buy From"
+            value={this.state.selectedValue}
+            onChange={this.handleSelected.bind(this)}>
+            <MenuItem value={'Amazon'} primaryText="Amazon" />
+            <MenuItem value={'WalMart'} primaryText="WalMart" />
+            <MenuItem value={'Ebay'} primaryText="Ebay" />
+          </SelectField>
           <div className="field-line">
             <TextField
               floatingLabelText="Notes"
@@ -78,11 +106,12 @@ class AddItemForm extends React.Component {
             </TextField>
           </div>
           <div className="button-line">
-            <RaisedButton primary={true} label="Submit" onClick={this.clickSubmit.bind(this)}></RaisedButton>
+            <RaisedButton primary={true} label="Search" onClick={this.clickSubmit.bind(this)}></RaisedButton>
             <RaisedButton primary={true} label="Cancel" onClick={this.clickCancel.bind(this)}></RaisedButton>
           </div>
         </form>
       </Card>
+      
     );
   }
 }
