@@ -1,7 +1,7 @@
 import React from 'react';
 import $ from 'jquery';
 import ReactDOM from 'react-dom';
-import UserNameInputBox from './UserNameInputBox.jsx';
+import UsernameInputBox from './UsernameInputBox.jsx';
 import CookieParser from 'cookie-parser';
 import UserList from './UserList.jsx';
 import { Link } from 'react-router-dom';
@@ -17,19 +17,23 @@ class CreateUser extends React.Component {
     console.log('Current houseId:', houseId);
 
     this.state = {
-      userName: '',
-      userNameExists: false,
-      error: '',
+      username: '',
+      email: '',
+      usernameExists: false,
+      emailExists: false,
+      usernameError: '',
+      emailError: '',
       houseId: houseId,
-      userNameList: [],
+      usernameList: [],
+      emailList: [],
       buttonClicked: false,
       usersExist: false,
       cookieIsSet: false
     };
 
-    this.submitUserName = this.submitUserName.bind(this);
+    this.submitUsernameAndEmail = this.submitUsernameAndEmail.bind(this);
     this.dataFromInputBox = this.dataFromInputBox.bind(this);
-    this.passInCooks = this.passInCooks.bind(this);
+    this.passInCookies = this.passInCookies.bind(this);
   }
 
   componentWillMount() {
@@ -48,7 +52,6 @@ class CreateUser extends React.Component {
             this.setState({
               usersExist: true
             });
-            console.log('usersExist');
           } else {
             console.log('usersDontExist');
           }
@@ -57,28 +60,37 @@ class CreateUser extends React.Component {
     }
   }
 
-  submitUserName() {
-    if (this.state.userName === '') {
+  submitUsernameAndEmail() {
+    if (this.state.username === '') {
       this.setState({
-        error: 'Please enter a valid username'
+        usernameError: 'Please enter a valid username'
       });
-    } else {
-      var userName = this.state.userName;
-      if (this.state.userNameExists === true) {
+    } 
+    if (this.state.email === '') {
+      this.setState({
+        emailError: 'Please enter a valid email'
+      });
+    } 
+    if (this.state.username !== '' && this.state.email !== '') {
+      var username = this.state.username;
+      var email = this.state.email;
+      if (this.state.usernameExists === true) {
         $.ajax({
           method: 'POST',
           url: '/createUser',
-          data: { userName: userName, houseId: this.state.houseId },
+          data: { username: username, emai: email, houseId: this.state.houseId },
           success: (data) => {
             console.log('what does it look like', data);
-            if (data !== 'Username already taken. Please enter another.') {
-              this.state.userNameList.push(this.state.userName);
+            if (data !== 'username already taken. Please enter another.') {
+              this.state.usernameList.push(this.state.username);
               this.setState({
-                error: ''
+                usernameError: '',
+                emailError: ''
               });
             } else {
               this.setState({
-                error: data
+                usernameError: data,
+                emailError: data
               });
             }
           }
@@ -87,29 +99,30 @@ class CreateUser extends React.Component {
     }
   }
 
-  passInCooks(username) {
+  passInCookies(username) {
     $.ajax({
       method: 'POST',
       url: '/cookUser',
-      data: {userName: username, houseId: this.state.houseId},
+      data: {username: username, houseId: this.state.houseId},
       success: (data) => {
-        console.log('done passing the cookie');
         this.setState({
           cookieIsSet: true
         });
+      },
+      error: (error) => {
+        console.log('THIS IS THE ERROR-----', error);
       }
     });
   }
 
   dataFromInputBox(data) {
-    if (data.userName) {
-
-    }
     this.setState({
-      userName: data.userName,
-      userNameExists: data.userNameExists
+      username: data.username,
+      usernameExists: data.usernameExists,
+      email: data.email,
+      emailExists: data.emailExists
     }, function() {
-      this.submitUserName();
+      this.submitUsernameAndEmail();
     });
   }
 
@@ -123,8 +136,8 @@ class CreateUser extends React.Component {
     return (
       <Card className="container">
         <h4 className="card-heading">Add new users</h4>
-        <UserNameInputBox error={this.state.error} dataFromInputBox={this.dataFromInputBox} submitUserName={this.submitUserName} buttonClicked={this.buttonClicked.bind(this)}/>
-        <UserList error={this.state.error} cookieIsSet={this.state.cookieIsSet} usersExist={this.state.usersExist} addUser={this.state.userNameList} passInCooks={this.passInCooks.bind(this)} clicked={this.state.buttonClicked}/>
+        <UsernameInputBox usernameError={this.state.usernameError} emailError={this.state.emailError} dataFromInputBox={this.dataFromInputBox} submitUsernameAndEmail={this.submitUsernameAndEmail} buttonClicked={this.buttonClicked.bind(this)}/>
+        <UserList usernameError={this.state.usernameError} cookieIsSet={this.state.cookieIsSet} usersExist={this.state.usersExist} addUser={this.state.usernameList} passInCookies={this.passInCookies.bind(this)} clicked={this.state.buttonClicked}/>
       </Card>
     );
   }

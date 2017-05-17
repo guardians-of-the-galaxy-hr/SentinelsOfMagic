@@ -24,6 +24,7 @@ CREATE INDEX houses_housename_index ON houses (housename);
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   username text NOT NULL,
+  email text NOT NULL,
   house_id integer NOT NULL
 );
 

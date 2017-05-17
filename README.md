@@ -1,4 +1,4 @@
-# fridgr
+# divy
 Tracking groceries got you stressed? Chill.
 
 ## Team
@@ -41,16 +41,16 @@ npm install
 
 -Install Postgre on your machine in whatever manner suites you.
 
--Create a database called fridgr in PSQL
+-Create a database called divy in PSQL
 
--Create a user (e.g. fridgr_app) with a password
+-Create a user (e.g. divy_app) with a password
 
--Grant this user permissions to access the database `fridgr`
+-Grant this user permissions to access the database `divy`
 
 -From project root run
 
 ```sh
-psql -U fridgr_app -h 127.0.0.1 -W fridgr < ./database/fridgr.sql
+psql -U divy_app -h 127.0.0.1 -W divy < ./database/divy.sql
 ```
 -U tells psql to run command as user (like MySQL, note capital)
 
@@ -60,7 +60,7 @@ psql -U fridgr_app -h 127.0.0.1 -W fridgr < ./database/fridgr.sql
 
 Now that the database is created and running, create a config.js file in your database directory that module exports the string
 
-'postgres://USERNAME:PASSWORD@localhost:5432/fridgr'
+'postgres://USERNAME:PASSWORD@localhost:5432/divy'
 
 with appropriate replacements for username and password.
 
